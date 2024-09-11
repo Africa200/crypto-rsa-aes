@@ -7,7 +7,10 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.FileInputStream;
 import java.security.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -101,5 +104,23 @@ public class CryptoUtils {
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(bytes);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         return keyFactory.generatePrivate(spec);
+    }
+
+    //Public Key from Certificates
+    public PublicKey getPublicKeyFromCertificate(String fileName) throws Exception {
+        FileInputStream fileInputStream = new FileInputStream(fileName);
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+        Certificate certificate = certificateFactory.generateCertificate(fileInputStream);
+        PublicKey publicKey = certificate.getPublicKey();
+        return publicKey;
+
+    }
+
+    //Private Key With JKS file
+    public PrivateKey getPrivateKeyFromJKS(String fileName, String alias, String password) throws Exception {
+        KeyStore keyStore = KeyStore.getInstance("JKS");
+        keyStore.load(new FileInputStream(fileName), password.toCharArray());
+        PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, password.toCharArray());
+        return privateKey;
     }
 }

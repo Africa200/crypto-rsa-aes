@@ -1,0 +1,2 @@
+keytool -genkey -keystore my-release-key.jks -alias Abdoulfatah -keyalg RSA -keysize 2048
+keytool -export -alias Abdoulfatah -keystore my-release-key.jks -rfc -file publicKey.cert
