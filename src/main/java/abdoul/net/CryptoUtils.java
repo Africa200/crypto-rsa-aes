@@ -5,6 +5,7 @@ import org.apache.commons.codec.binary.Hex;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.FileInputStream;
@@ -122,5 +123,41 @@ public class CryptoUtils {
         keyStore.load(new FileInputStream(fileName), password.toCharArray());
         PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, password.toCharArray());
         return privateKey;
+    }
+
+    // Signe document with HMAC
+    public  String hmacSign(byte[] bytes, SecretKey secretKey) throws Exception {
+        SecretKeySpec keySpec = new SecretKeySpec(secretKey.getEncoded(), "HmacSHA256");
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(keySpec);
+        byte[] doFinal = mac.doFinal(bytes);
+        return  Base64.getEncoder().encodeToString(doFinal);
+
+    }
+
+    //Hmac verification signature
+    public boolean hmacVerify(byte[] bytes, String signature, SecretKey secretKey) throws Exception {
+        SecretKeySpec keySpec = new SecretKeySpec(secretKey.getEncoded(), "HmacSHA256");
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(keySpec);
+        byte[] doFinal = mac.doFinal(bytes);
+        return  Base64.getEncoder().encodeToString(doFinal).equals(signature);
+    }
+
+    //signe document with RSA
+    public String rsaSign(byte[] bytes, PrivateKey privateKey) throws Exception {
+        Signature signature = Signature.getInstance("SHA256withRSA");
+        signature.initSign(privateKey);
+        signature.update(bytes);
+        byte[] sign = signature.sign();
+        return  Base64.getEncoder().encodeToString(sign);
+    }
+
+    //Verify signature with RSA
+    public boolean rsaVerify(byte[] bytes, String signature, PublicKey publicKey) throws Exception {
+        Signature signature1 = Signature.getInstance("SHA256withRSA");
+        signature1.initVerify(publicKey);
+        signature1.update(bytes);
+        return signature1.verify(Base64.getDecoder().decode(signature));
     }
 }
